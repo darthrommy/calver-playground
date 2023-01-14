@@ -18,7 +18,7 @@ jobs:
         id: check_pr
 
       # Create PR if not exists
-      - uses: actions/request-action@v2.x
+      - uses: octokit/request-action@v2.x
         if: steps.check_pr.outputs.count == 0
         with:
           route: POST /repos/{owner}/{repo}/pulls
