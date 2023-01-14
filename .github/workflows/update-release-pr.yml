@@ -15,9 +15,10 @@ jobs:
         id: get_prev_tag
         with:
           route: GET /repos/{owner}/{repo}/releases/latest
+          owner: darthrommy
+          repo: calver-playground
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.repository }}
 
       # Generate release tag
       - id: get_relese_tag
@@ -36,18 +37,20 @@ jobs:
         id: generate_changelog
         with:
           route: POST /repos/{owner}/{repo}/releases/generate-notes
+          owner: darthrommy
+          repo: calver-playground
+          tag_name: ${{ steps.get_release_tag.outputs.release_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.repository }}
-          INPUT_TAG_NAME: ${{ steps.get_release_tag.outputs.release_tag }}
 
       # Update PR
       - uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/{owner}/{repo}/pulls/{pull_number}
+          owner: darthrommy
+          repo: calver-playground
+          pull_number: ${{ github.event.number }}
+          title: ${{ steps.get_release_tag.outputs.release_tag }}
+          body: ${{ steps.generate_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.repository }}
-          INPUT_PULL_NUMBER: ${{ github.event.number }}
-          INPUT_TITLE: ${{ steps.get_release_tag.outputs.release_tag }}
-          INPUT_BODY: ${{ steps.generate_changelog.outputs.changelog }}
