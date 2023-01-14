@@ -1,0 +1,34 @@
+name: Automatically label pull request
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto-label-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Get label name from branch
+      - name: Get label name
+        id: label
+        run: |
+          branch_type=$(echo ${{ github.event.pull_request.title }} | cut -d "/" -f1)
+          if [ $branch_type == "feat" ]; then
+            label_name=$(echo "feature")
+          elif [ $branch_type == "fix" ]; then
+            label_name=$(echo "bug")
+          else
+            label_name=""
+          fi
+          echo "label=$label_name" >> $GITHUB_OUTPUT
+
+      # Add label to PR
+      - name: Auto label
+        if: steps.label.outputs.label
+        run: |
+          gh pr edit ${{ github.event.number }} --add-label ${{ steps.label.outputs.label }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
