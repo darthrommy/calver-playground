@@ -12,23 +12,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      # Check if PR already exists
-      - name: Check existence of release pull request
-        run: echo "count=$(gh pr list -S 'Release in:title' -B master -s open | wc -l)" >> $GITHUB_OUTPUT
-        id: check_pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Create PR if not exists
-      - name: Create release pull request
-        uses: octokit/request-action@v2.x
-        if: steps.check_pr.outputs.count == 0
         with:
-          route: POST /repos/:repository/pulls
+          fetch-depth: 0
+
+      # Get previous release
+      - name: Get previous release
+        uses: octokit/request-action@v2.x
+        id: get_prev_release
+        with:
+          route: GET /repos/:repository/releases/latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_REPOSITORY: ${{ github.repository }}
-          INPUT_TITLE: Preparing release pull request...
-          INPUT_HEAD: staging
-          INPUT_BASE: master
+
+      # Generate release tag
+      - name: Generate release tag
+        id: get_release_tag
+        run: |
+          today=$(date +'%Y.%m.%d')
+          prev_release_date=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $1}')
+          prev_release_count=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $2}')
+          if [[ ! $prev_release_date = $today ]]; then
+            echo "will be today's first release"
+            prev_release_count=0
+          fi
+          echo "release_tag=$today-$(($prev_release_count + 1))" >> $GITHUB_OUTPUT
+
+      # Create a release PR
+      - name: Create a release PR
+        uses: bakunyo/git-pr-release-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: master
+          GIT_PR_RELEASE_BRANCH_STAGING: staging
+          RELEASE_TAG: ${{ steps.get_release_tag.outputs.release_tag }}
+        with:
+          args: "--squashed"
