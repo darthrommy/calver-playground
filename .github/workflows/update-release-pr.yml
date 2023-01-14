@@ -51,6 +51,6 @@ jobs:
       # Update PR
       - name: Update pull request
         run: |
-          gh pr edit ${{ github.event.number }} -b ${{ fromJSON(steps.generate_changelog.outputs.data).body | sed }} -t "Release ${{ steps.get_release_tag.outputs.release_tag }}"
+          gh pr edit ${{ github.event.number }} -b ${{ fromJSON(steps.generate_changelog.outputs.data).body }} -t "Release ${{ steps.get_release_tag.outputs.release_tag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
