@@ -17,3 +17,6 @@
 - name: ignore
   description: Won't be written in changelog
   color: 98948e
+
+- name: release
+  color: 095ed3
