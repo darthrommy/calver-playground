@@ -46,5 +46,6 @@ jobs:
           GIT_PR_RELEASE_BRANCH_PRODUCTION: master
           GIT_PR_RELEASE_BRANCH_STAGING: staging
           RELEASE_TAG: ${{ steps.get_release_tag.outputs.release_tag }}
+          GIT_PR_RELEASE_TEMPLATE: .github/.git-pr-release-template
         with:
           args: "--squashed"
