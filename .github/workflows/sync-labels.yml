@@ -12,7 +12,9 @@ jobs:
   sync-lables:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: micnncim/action-label-syncer@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yml
+          delet-other-labels: true
+          dry-run: false
+          token: ${{ secrets.GITHUB_TOKEN }}
