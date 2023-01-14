@@ -15,5 +15,5 @@
   color: c79b2d
 
 - name: ignore
-  decription: Won't be written in changelog
+  description: Won't be written in changelog
   color: 98948e
