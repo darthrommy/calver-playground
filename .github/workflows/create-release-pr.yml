@@ -1,0 +1,52 @@
+name: Create a release pull request
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - staging
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Get previous release
+      - name: Get previous release
+        uses: octokit/request-action@v2.x
+        id: get_prev_release
+        with:
+          route: GET /repos/:repository/releases/latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_REPOSITORY: ${{ github.repository }}
+
+      # Generate release tag
+      - name: Generate release tag
+        id: get_release_tag
+        run: |
+          today=$(date +'%Y.%m.%d')
+          prev_release_date=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $1}')
+          prev_release_count=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $2}')
+          if [[ ! $prev_release_date = $today ]]; then
+            echo "will be today's first release"
+            prev_release_count=0
+          fi
+          echo "release_tag=$today-$(($prev_release_count + 1))" >> $GITHUB_OUTPUT
+
+      # Create a release PR
+      - name: Create a release PR
+        uses: bakunyo/git-pr-release-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: master
+          GIT_PR_RELEASE_BRANCH_STAGING: staging
+          RELEASE_TAG: ${{ steps.get_release_tag.outputs.release_tag }}
+          GIT_PR_RELEASE_TEMPLATE: .github/.git-pr-release-template
+          GIT_PR_RELEASE_LABELS: release
+        with:
+          args: "--squashed"

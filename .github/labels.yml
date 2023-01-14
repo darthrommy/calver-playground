@@ -1,0 +1,22 @@
+- name: feature
+  description: New feature
+  color: 2ba48a
+
+- name: enhancement
+  description: Extend existing feature
+  color: 449c0c
+
+- name: bug
+  description: Something isn't working
+  color: fe4c5e
+
+- name: dependabot
+  description: "Dependency update"
+  color: c79b2d
+
+- name: ignore
+  description: Won't be written in changelog
+  color: 98948e
+
+- name: release
+  color: 095ed3
