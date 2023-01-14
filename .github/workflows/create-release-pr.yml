@@ -22,9 +22,10 @@ jobs:
         if: steps.check_pr.outputs.count == 0
         with:
           route: POST /repos/{owner}/{repo}/pulls
+          owner: darthrommy
+          repo: calver-playground
+          title: Preparing release pull request...
+          head: staging
+          base: master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.repository }}
-          INPUT_BASE: master
-          INPUT_HEAD: staging
-          INPUT_TITLE: Preparing release pull request...
