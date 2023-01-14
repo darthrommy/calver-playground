@@ -47,7 +47,8 @@ jobs:
           route: PATCH /repos/:repository/pulls/:pull_number
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.event.number }}
+          INPUT_REPOSITORY: ${{ github.repository }}
+          INPUT_PULL_NUMBER: ${{ github.event.number }}
           INPUT_TITLE: ${{ format('Release {0} (released)', steps.get_release_tag.outputs.release_tag) }}
 
       # create draft release
