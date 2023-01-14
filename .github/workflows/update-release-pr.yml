@@ -47,16 +47,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_REPOSITORY: ${{ github.repository }}
           INPUT_TAG_NAME: ${{ steps.get_release_tag.outputs.release_tag }}
+          INPUT_TARGET_COMMITISH: staging
 
       # Update PR
       - name: Update pull request
-        uses: octokit/request-action@v2.x
-        with:
-          route: PATCH /repos/:repository/pulls/:pull_number
+        run: |
+          gh pr edit ${{ github.event.number }} -b ${{ fromJSON(steps.generate_changelog.outputs.data).body }} -t "Release ${{ steps.get_release_tag.outputs.release_tag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORY: ${{ github.repository }}
-          INPUT_PULL_NUMBER: ${{ github.event.number }}
-          INPUT_TITLE: ${{ format('Release {0}', steps.get_release_tag.outputs.release_tag) }}
-          INPUT_BODY: ${{ format('{0}', fromJSON(steps.generate_changelog.outputs.data).body) }}
-          INPUT_TARGET_COMMITISH: staging
