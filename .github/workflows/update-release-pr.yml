@@ -25,13 +25,13 @@ jobs:
       - id: get_release_tag
         run: |
           today=$(date +'%Y.%m.%d')
-          pre_release_date=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $1}')
-          pre_release_count=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $2}')
-          if [[ ! $pre_release_date = $today ]]; then
+          prev_release_date=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $1}')
+          prev_release_count=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $2}')
+          if [[ ! $prev_release_date = $today ]]; then
             echo "will be today's first release"
-            pre_release_count=0
+            prev_release_count=0
           fi
-          echo "release_tag=$today-$(($pre_release_count + 1))" >> $GITHUB_OUTPUT
+          echo "release_tag=$today-$(($prev_release_count + 1))" >> $GITHUB_OUTPUT
 
       # Generate release note
       - uses: octokit/request-action@v2.x
