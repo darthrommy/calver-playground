@@ -22,7 +22,7 @@ jobs:
           INPUT_REPOSITORY: ${{ github.repository }}
 
       # Generate release tag
-      - id: get_relese_tag
+      - id: get_release_tag
         run: |
           today=$(date +'%Y.%m.%d')
           pre_release_date=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $1}')
