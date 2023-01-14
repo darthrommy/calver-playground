@@ -16,16 +16,17 @@ jobs:
       # Check if PR already exists
       - run: echo "count=$(gh pr list -S 'Release in:title' -B stage -s open | wc -l)" >> $GITHUB_OUTPUT
         id: check_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Create PR if not exists
       - uses: octokit/request-action@v2.x
         if: steps.check_pr.outputs.count == 0
         with:
-          route: POST /repos/{owner}/{repo}/pulls
-          owner: darthrommy
-          repo: calver-playground
-          title: Preparing release pull request...
-          head: staging
-          base: master
+          route: POST /repos/:repository/pulls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_REPOSITORY: ${{ github.repository }}
+          INPUT_TITLE: Preparing release pull request...
+          INPUT_HEAD: staging
+          INPUT_BASE: master
