@@ -10,10 +10,6 @@
   description: Something isn't working
   color: fe4c5e
 
-- name: refactor
-  description: Refactoring codes
-  color: f27142
-
 - name: dependabot
   description: "Dependency update"
   color: c79b2d
