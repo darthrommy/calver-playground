@@ -13,8 +13,9 @@ jobs:
       - uses: actions/checkout@v3
 
       # Get previous release
-      - uses: octokit/request-action@v2.x
-        id: get_prev_tag
+      - name: Get previous release
+        uses: octokit/request-action@v2.x
+        id: get_prev_release
         with:
           route: GET /repos/:repository/releases/latest
         env:
@@ -22,11 +23,12 @@ jobs:
           INPUT_REPOSITORY: ${{ github.repository }}
 
       # Generate release tag
-      - id: get_release_tag
+      - name: Generate release tag
+        id: get_release_tag
         run: |
           today=$(date +'%Y.%m.%d')
-          prev_release_date=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $1}')
-          prev_release_count=$(echo ${{ fromJSON(steps.get_prev_tag.outputs.data).tag_name }} | awk -F'-' '{print $2}')
+          prev_release_date=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $1}')
+          prev_release_count=$(echo ${{ fromJSON(steps.get_prev_release.outputs.data).tag_name }} | awk -F'-' '{print $2}')
           if [[ ! $prev_release_date = $today ]]; then
             echo "will be today's first release"
             prev_release_count=0
@@ -34,7 +36,8 @@ jobs:
           echo "release_tag=$today-$(($prev_release_count + 1))" >> $GITHUB_OUTPUT
 
       # Generate release note
-      - uses: octokit/request-action@v2.x
+      - name: Generate changelog
+        uses: octokit/request-action@v2.x
         id: generate_changelog
         with:
           route: POST /repos/:repository/releases/generate-notes
@@ -44,7 +47,8 @@ jobs:
           INPUT_TAG_NAME: ${{ steps.get_release_tag.outputs.release_tag }}
 
       # Update PR
-      - uses: octokit/request-action@v2.x
+      - name: Update pull request
+        uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/:repository/pulls/:pull_number
         env:
@@ -52,4 +56,4 @@ jobs:
           INPUT_REPOSITORY: ${{ github.repository }}
           INPUT_PULL_NUMBER: ${{ github.event.number }}
           INPUT_TITLE: ${{ steps.get_release_tag.outputs.release_tag }}
-          INPUT_BODY: ${{ steps.generate_changelog.outputs.changelog }}
+          INPUT_BODY: ${{ fromJSON(steps.generate_changelog.outputs.data).body }}

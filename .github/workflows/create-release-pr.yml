@@ -14,13 +14,15 @@ jobs:
       - uses: actions/checkout@v3
 
       # Check if PR already exists
-      - run: echo "count=$(gh pr list -S 'Release in:title' -B master -s open | wc -l)" >> $GITHUB_OUTPUT
+      - name: Check existence of release pull request
+        run: echo "count=$(gh pr list -S 'Release in:title' -B master -s open | wc -l)" >> $GITHUB_OUTPUT
         id: check_pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Create PR if not exists
-      - uses: octokit/request-action@v2.x
+      - name: Create release pull request
+        uses: octokit/request-action@v2.x
         if: steps.check_pr.outputs.count == 0
         with:
           route: POST /repos/:repository/pulls
