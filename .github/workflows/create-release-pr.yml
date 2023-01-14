@@ -1,0 +1,29 @@
+name: Create a release pull request
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - staging
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Check if PR already exists
+      - run: echo "count=$(gh pr list -S 'Release in:title' -B stage -s open | wc -l)" >> $GITHUB_OUTPUT
+        id: check_pr
+
+      # Create PR if not exists
+      - uses: actions/request-action@v2.x
+        if: steps.check_pr.outputs.count == 0
+        with:
+          route: POST /repos/{owner}/{repo}/pulls
+          owner: darthrommy
+          repo: calver-playground
+          title: Preparing release pull request...
+          head: staging
+          base: master
